@@ -61,18 +61,22 @@ const grid=new THREE.GridHelper(40,40,0x292a2c,0x292a2c);grid.position.y=-.015;s
 const modelHolder=new THREE.Group();avatar.add(modelHolder);
 new GLTFLoader().load('./roblox_rigged_r6_noob.glb',gltf=>{
  const model=gltf.scene;
- model.rotation.x=-Math.PI/2;
  model.updateMatrixWorld(true);
- const bounds=new THREE.Box3().setFromObject(model);
+ let bounds=new THREE.Box3().setFromObject(model);
+ const rawSize=new THREE.Vector3();bounds.getSize(rawSize);
+ // FBX exports commonly use Z-up; select the vertical axis from the source dimensions.
+ if(rawSize.z>rawSize.y*1.2)model.rotation.x=-Math.PI/2;
+ model.updateMatrixWorld(true);
+ bounds.setFromObject(model);
  const dimensions=new THREE.Vector3();bounds.getSize(dimensions);
- const factor=5/dimensions.y;
+ if(!Number.isFinite(dimensions.y)||dimensions.y<1e-6)throw new Error('Invalid R6 model bounds');
+ const factor=Math.min(4.65/dimensions.y,3.45/Math.max(dimensions.x,dimensions.z));
  model.scale.multiplyScalar(factor);
  model.updateMatrixWorld(true);
  bounds.setFromObject(model);
- model.position.x-= (bounds.min.x+bounds.max.x)/2;
- model.position.y-=bounds.min.y;
- model.position.z-= (bounds.min.z+bounds.max.z)/2;
+ model.position.set(-(bounds.min.x+bounds.max.x)/2,-bounds.min.y,-(bounds.min.z+bounds.max.z)/2);
  modelHolder.add(model);
+ modelHolder.updateMatrixWorld(true);
  draw();
 },undefined,error=>{console.error('R6 model failed to load',error);$('sceneLabel').textContent='MODEL LOAD FAILED'});
 const world=new THREE.Group();scene.add(world);

@@ -69,26 +69,59 @@ function draw(){
  ctx.beginPath();ctx.moveTo(0,h*.73);ctx.lineTo(w,h*.73);ctx.stroke();
  for(let i=0;i<8;i++){let y=h*.73+(h*.27)*Math.pow(i/8,1.4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
  for(let i=-5;i<=5;i++){ctx.beginPath();ctx.moveTo(w/2+i*12,h*.73);ctx.lineTo(w/2+i*85,h);ctx.stroke()}
- const s=states[group],scale=Math.min(w/12.5,h/10.5),ox=w/2,oy=h*.84;
- function project(x,y,z){let a=view==='3d'?angle:0;let rx=x*Math.cos(a)+z*Math.sin(a),rz=z*Math.cos(a)-x*Math.sin(a);let perspective=view==='3d'?1/(1+rz*.09):1;return [ox+rx*scale*perspective,oy-y*scale*perspective]}
- const boxes=group==='World'?[[-1,0,-.65,2,2,1.3,'#56504a']]:[
- [-1,2,-.5,2,2,1,'#0d69b5'],[-1,4,-.5,2,1,1,'#f4d32d'],[-2,2,-.5,1,2,1,'#f4d32d'],[1,2,-.5,1,2,1,'#f4d32d'],[-1,0,-.5,1,2,1,'#65ad31'],[0,0,-.5,1,2,1,'#65ad31']];
- const points=[];
- boxes.forEach(([x,y,z,bw,bh,bd,color],index)=>{
- const verts=[[x,y,z],[x+bw,y,z],[x+bw,y+bh,z],[x,y+bh,z],[x,y,z+bd],[x+bw,y,z+bd],[x+bw,y+bh,z+bd],[x,y+bh,z+bd]].map(p=>project(...p));
- points.push(...verts);
- const shade=(hex,m)=>{let n=parseInt(hex.slice(1),16);return '#'+[16,8,0].map(k=>Math.round(Math.min(255,Math.max(0,((n>>k)&255)*m))).toString(16).padStart(2,'0')).join('')};
- const faces=view==='2d'?[[0,1,2,3]]:(Math.sin(angle)>=0?[[0,1,2,3],[1,5,6,2],[3,2,6,7]]:[[0,1,2,3],[4,0,3,7],[3,2,6,7]]);
- faces.forEach((face,j)=>{ctx.fillStyle=shade(color,j===0?1:j===1?.78:1.12);ctx.beginPath();face.forEach((n,k)=>{const p=verts[n];k?ctx.lineTo(...p):ctx.moveTo(...p)});ctx.closePath();ctx.fill();ctx.strokeStyle=shade(color,.58);ctx.lineWidth=.65;ctx.stroke()});
- if(index===1&&group!=='World'){
- const frontZ=-.505;
- const eyeL=project(-.38,4.62,frontZ),eyeR=project(.26,4.62,frontZ);
- ctx.fillStyle='#25201c';
- for(const p of [eyeL,eyeR])ctx.fillRect(p[0],p[1],Math.max(2,scale*.105),Math.max(2,scale*.105));
- const a=project(-.3,4.34,frontZ),mid=project(0,4.23,frontZ),b=project(.35,4.34,frontZ);
- ctx.strokeStyle='#5c3922';ctx.lineWidth=Math.max(1,scale*.035);ctx.beginPath();ctx.moveTo(...a);ctx.quadraticCurveTo(mid[0],mid[1]+scale*.09,b[0],b[1]);ctx.stroke();
+ const s=states[group],scale=Math.min(w/9.5,h/7.8),ox=w/2,oy=h*.87;
+ const yaw=view==='3d'?angle:0;
+ function project(x,y,z){
+  const rx=x*Math.cos(yaw)+z*Math.sin(yaw),depth=z*Math.cos(yaw)-x*Math.sin(yaw);
+  const k=view==='3d'?8/(8+depth):1;
+  return [ox+rx*scale*k,oy-(y-0.05)*scale*k];
  }
- });
+ const parts=group==='World'?
+ [{x:0,y:1,z:0,w:2,h:2,d:1.5,color:'#66615a'}]:
+ [
+ {x:0,y:3,z:0,w:2,h:2,d:1,color:'#0b66b2'},
+ {x:0,y:4.5,z:0,w:2,h:1,d:1,color:'#f5d531',head:true},
+ {x:-1.5,y:3,z:0,w:1,h:2,d:1,color:'#f5d531'},
+ {x:1.5,y:3,z:0,w:1,h:2,d:1,color:'#f5d531'},
+ {x:-.5,y:1,z:0,w:1,h:2,d:1,color:'#68ad35'},
+ {x:.5,y:1,z:0,w:1,h:2,d:1,color:'#68ad35'}
+ ];
+ const points=[];
+ const shade=(hex,f)=>{const n=parseInt(hex.slice(1),16);return '#'+[16,8,0].map(k=>Math.round(Math.min(255,((n>>k)&255)*f)).toString(16).padStart(2,'0')).join('')};
+ const faces=[];
+ for(const part of parts){
+  const {x,y,z,w:pw,h:ph,d,color}=part;
+  const corners=[[-1,-1,-1],[1,-1,-1],[1,1,-1],[-1,1,-1],[-1,-1,1],[1,-1,1],[1,1,1],[-1,1,1]].map(([sx,sy,sz])=>[x+sx*pw/2,y+sy*ph/2,z+sz*d/2]);
+  points.push(...corners.map(p=>project(...p)));
+  const surfaces=[
+   {ids:[0,1,2,3],normal:[0,0,-1],shade:1},
+   {ids:[5,4,7,6],normal:[0,0,1],shade:.7},
+   {ids:[4,0,3,7],normal:[-1,0,0],shade:.78},
+   {ids:[1,5,6,2],normal:[1,0,0],shade:.82},
+   {ids:[3,2,6,7],normal:[0,1,0],shade:1.12},
+   {ids:[4,5,1,0],normal:[0,-1,0],shade:.62}
+  ];
+  for(const surface of surfaces){
+   const [nx,,nz]=surface.normal;
+   if(nx*Math.sin(yaw)+nz*Math.cos(yaw)>=.001)continue;
+   const verts=surface.ids.map(i=>corners[i]);
+   const depth=verts.reduce((sum,p)=>sum+(p[2]*Math.cos(yaw)-p[0]*Math.sin(yaw)),0)/4;
+   faces.push({verts,color:shade(color,surface.shade),depth,head:part.head,front:surface.ids[0]===0});
+  }
+ }
+ faces.sort((a,b)=>b.depth-a.depth);
+ for(const face of faces){
+  const projected=face.verts.map(p=>project(...p));
+  ctx.beginPath();projected.forEach((p,i)=>i?ctx.lineTo(...p):ctx.moveTo(...p));ctx.closePath();
+  ctx.fillStyle=face.color;ctx.fill();ctx.strokeStyle=shade(face.color,.92);ctx.lineWidth=.5;ctx.stroke();
+  if(face.head&&face.front){
+   const front=-.507;
+   const eyes=[project(-.36,4.62,front),project(.26,4.62,front)];
+   ctx.fillStyle='#282319';for(const p of eyes)ctx.fillRect(p[0],p[1],Math.max(2,scale*.075),Math.max(2,scale*.075));
+   const l=project(-.25,4.34,front),m=project(0,4.27,front),r=project(.3,4.34,front);
+   ctx.strokeStyle='#65451e';ctx.lineWidth=Math.max(1,scale*.023);ctx.beginPath();ctx.moveTo(...l);ctx.quadraticCurveTo(m[0],m[1]+scale*.04,r[0],r[1]);ctx.stroke();
+  }
+ }
  if(!s.enabled)return;
  let x=Math.min(...points.map(p=>p[0]))-s.padding,y=Math.min(...points.map(p=>p[1]))-s.padding,r=Math.max(...points.map(p=>p[0]))+s.padding,b=Math.max(...points.map(p=>p[1]))+s.padding;
  let bw=r-x,bh=b-y;ctx.save();

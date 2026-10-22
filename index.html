@@ -39,9 +39,10 @@ footer{border-top:1px solid var(--line);margin-top:10px;display:flex;justify-con
 </div>
 <footer><button id="resetSettings">Reset settings</button></footer>
 </main>
+<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js';
-import {GLTFLoader} from 'https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/loaders/GLTFLoader.js';
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 const $=id=>document.getElementById(id),viewport=$('viewport'),overlay=$('overlay'),ctx=overlay.getContext('2d');
 const defaults={enabled:true,style:'corner',thickness:1.5,padding:3,cornerLength:25,color:'#c6c6c8',opacity:100,outline:true,outlineColor:'#050505',fill:false,fillColor:'#c6c6c8',fillOpacity:15};
 const states={Enemy:{...defaults},Friendly:{...defaults,color:'#87c4c6'},Self:{...defaults,color:'#d1bd9d'},World:{...defaults,color:'#d1ad73'}};

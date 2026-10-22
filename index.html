@@ -37,7 +37,10 @@
       </div>
       <div class="heading">
         <b>Box</b>
-        <label> <input id="enabled" type="checkbox" checked /> Enabled</label>
+        <label>
+          <input id="enabled" data-visual="box" data-key="enabled" type="checkbox" checked />
+          Enabled</label
+        >
       </div>
       <div class="settings">
         <div>
@@ -54,21 +57,46 @@
               <label for="thickness">Thickness</label>
               <output id="thicknessOut"> </output>
             </div>
-            <input id="thickness" type="range" min=".5" max="5" step=".5" />
+            <input
+              id="thickness"
+              data-visual="box"
+              data-key="thickness"
+              data-unit=" px"
+              type="range"
+              min=".5"
+              max="5"
+              step=".5"
+            />
           </div>
           <div class="range">
             <div>
               <label for="padding">Padding</label>
               <output id="paddingOut"> </output>
             </div>
-            <input id="padding" type="range" min="0" max="20" />
+            <input
+              id="padding"
+              data-visual="box"
+              data-key="padding"
+              data-unit=" px"
+              type="range"
+              min="0"
+              max="20"
+            />
           </div>
           <div class="range" id="cornerRow">
             <div>
               <label for="cornerLength">Corner length</label>
               <output id="cornerLengthOut"> </output>
             </div>
-            <input id="cornerLength" type="range" min="10" max="50" />
+            <input
+              id="cornerLength"
+              data-visual="box"
+              data-key="cornerLength"
+              data-unit="%"
+              type="range"
+              min="10"
+              max="50"
+            />
           </div>
         </div>
         <div>
@@ -77,7 +105,13 @@
             <span>Color</span>
             <div class="color">
               <small id="colorHex"> </small>
-              <input id="color" type="color" aria-label="color" />
+              <input
+                id="color"
+                data-visual="box"
+                data-key="color"
+                type="color"
+                aria-label="color"
+              />
             </div>
           </div>
           <div class="range">
@@ -85,29 +119,56 @@
               <label for="opacity">Opacity</label>
               <output id="opacityOut"> </output>
             </div>
-            <input id="opacity" type="range" min="0" max="100" step="5" />
+            <input
+              id="opacity"
+              data-visual="box"
+              data-key="opacity"
+              data-unit="%"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+            />
           </div>
           <div class="row">
             <span>Outline</span>
-            <input id="outline" type="checkbox" aria-label="Outline" />
+            <input
+              id="outline"
+              data-visual="box"
+              data-key="outline"
+              type="checkbox"
+              aria-label="Outline"
+            />
           </div>
           <div class="row" id="outlineRow">
             <span>Outline color</span>
             <div class="color">
               <small id="outlineColorHex"> </small>
-              <input id="outlineColor" type="color" aria-label="outlineColor" />
+              <input
+                id="outlineColor"
+                data-visual="box"
+                data-key="outlineColor"
+                type="color"
+                aria-label="outlineColor"
+              />
             </div>
           </div>
           <div class="row">
             <span>Fill</span>
-            <input id="fill" type="checkbox" aria-label="Fill" />
+            <input id="fill" data-visual="box" data-key="fill" type="checkbox" aria-label="Fill" />
           </div>
           <div id="fillOptions">
             <div class="row">
               <span>Fill color</span>
               <div class="color">
                 <small id="fillColorHex"> </small>
-                <input id="fillColor" type="color" aria-label="fillColor" />
+                <input
+                  id="fillColor"
+                  data-visual="box"
+                  data-key="fillColor"
+                  type="color"
+                  aria-label="fillColor"
+                />
               </div>
             </div>
             <div class="range">
@@ -115,7 +176,111 @@
                 <label for="fillOpacity">Fill opacity</label>
                 <output id="fillOpacityOut"> </output>
               </div>
-              <input id="fillOpacity" type="range" min="0" max="100" step="5" />
+              <input
+                id="fillOpacity"
+                data-visual="box"
+                data-key="fillOpacity"
+                data-unit="%"
+                type="range"
+                min="0"
+                max="100"
+                step="5"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="heading">
+        <b>Name</b>
+        <label
+          ><input id="nameEnabled" type="checkbox" data-visual="name" data-key="enabled" />
+          Enabled</label
+        >
+      </div>
+      <div class="settings">
+        <div>
+          <div class="section">Label</div>
+          <div class="row">
+            <label for="nameText">Text</label
+            ><input id="nameText" type="text" maxlength="48" data-visual="name" data-key="text" />
+          </div>
+          <div class="row">
+            <label for="namePosition">Position</label
+            ><select id="namePosition" data-visual="name" data-key="position">
+              <option value="top">Top</option>
+              <option value="bottom">Bottom</option>
+              <option value="left">Left</option>
+              <option value="right">Right</option>
+            </select>
+          </div>
+          <div class="range">
+            <div><label for="nameSize">Size</label><output id="nameSizeOut"></output></div>
+            <input
+              id="nameSize"
+              type="range"
+              min="10"
+              max="24"
+              data-visual="name"
+              data-key="size"
+              data-unit=" px"
+            />
+          </div>
+          <div class="range">
+            <div><label for="nameGap">Spacing</label><output id="nameGapOut"></output></div>
+            <input
+              id="nameGap"
+              type="range"
+              min="0"
+              max="20"
+              data-visual="name"
+              data-key="gap"
+              data-unit=" px"
+            />
+          </div>
+        </div>
+        <div>
+          <div class="section">Appearance</div>
+          <div class="row">
+            <span>Color</span>
+            <div class="color">
+              <small id="nameColorHex"></small
+              ><input
+                id="nameColor"
+                type="color"
+                aria-label="Name color"
+                data-visual="name"
+                data-key="color"
+              />
+            </div>
+          </div>
+          <div class="range">
+            <div><label for="nameOpacity">Opacity</label><output id="nameOpacityOut"></output></div>
+            <input
+              id="nameOpacity"
+              type="range"
+              min="0"
+              max="100"
+              step="5"
+              data-visual="name"
+              data-key="opacity"
+              data-unit="%"
+            />
+          </div>
+          <div class="row">
+            <label for="nameOutline">Outline</label
+            ><input id="nameOutline" type="checkbox" data-visual="name" data-key="outline" />
+          </div>
+          <div class="row" id="nameOutlineRow">
+            <span>Outline color</span>
+            <div class="color">
+              <small id="nameOutlineColorHex"></small
+              ><input
+                id="nameOutlineColor"
+                type="color"
+                aria-label="Name outline color"
+                data-visual="name"
+                data-key="outlineColor"
+              />
             </div>
           </div>
         </div>

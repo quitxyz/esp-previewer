@@ -1,31 +1,11 @@
 import { createPreview } from './preview.js';
+import { createSettings, states } from './settings.js';
 
-const defaults = {
-  enabled: true,
-  style: 'corner',
-  thickness: 1.5,
-  padding: 3,
-  cornerLength: 25,
-  color: '#c6c6c8',
-  opacity: 100,
-  outline: true,
-  outlineColor: '#050505',
-  fill: false,
-  fillColor: '#c6c6c8',
-  fillOpacity: 15,
-};
-const colors = { Enemy: '#c6c6c8', Friendly: '#87c4c6', Self: '#d1bd9d', World: '#d1ad73' };
-const createSettings = (group) => ({ ...defaults, color: colors[group] });
-const states = Object.fromEntries(
-  Object.keys(colors).map((group) => [group, createSettings(group)]),
-);
 const get = (id) => document.getElementById(id);
 const groupButtons = document.querySelectorAll('[data-group]');
 const styleButtons = document.querySelectorAll('[data-style]');
 const viewButtons = document.querySelectorAll('[data-view]');
-const inputs = Object.keys(defaults)
-  .filter((key) => key !== 'style')
-  .map(get);
+const inputs = document.querySelectorAll('[data-visual][data-key]');
 let group = 'Enemy';
 
 function select(buttons, key, value) {
@@ -50,26 +30,26 @@ function sync() {
   const settings = states[group];
   get('subjectLabel').textContent = group === 'World' ? 'Object' : 'R6';
   for (const input of inputs) {
-    const value = settings[input.id];
+    const value = settings[input.dataset.visual][input.dataset.key];
     if (input.type === 'checkbox') input.checked = value;
-    else input.value = value;
+    else if (input.value !== String(value)) input.value = value;
     if (input.type === 'range') {
-      const unit = ['thickness', 'padding'].includes(input.id) ? ' px' : '%';
-      get(`${input.id}Out`).textContent = value + unit;
+      get(`${input.id}Out`).textContent = value + input.dataset.unit;
     }
     if (input.type === 'color') get(`${input.id}Hex`).textContent = value;
   }
   select(groupButtons, 'group', group);
-  select(styleButtons, 'style', settings.style);
-  get('cornerRow').hidden = settings.style !== 'corner';
-  get('outlineRow').hidden = !settings.outline;
-  get('fillOptions').hidden = !settings.fill;
+  select(styleButtons, 'style', settings.box.style);
+  get('cornerRow').hidden = settings.box.style !== 'corner';
+  get('outlineRow').hidden = !settings.box.outline;
+  get('fillOptions').hidden = !settings.box.fill;
+  get('nameOutlineRow').hidden = !settings.name.outline;
   preview?.update(group, settings);
 }
 
 for (const input of inputs) {
   input.addEventListener('input', () => {
-    states[group][input.id] =
+    states[group][input.dataset.visual][input.dataset.key] =
       input.type === 'checkbox'
         ? input.checked
         : input.type === 'range'
@@ -86,7 +66,7 @@ for (const button of groupButtons) {
 }
 for (const button of styleButtons) {
   button.addEventListener('click', () => {
-    states[group].style = button.dataset.style;
+    states[group].box.style = button.dataset.style;
     sync();
   });
 }

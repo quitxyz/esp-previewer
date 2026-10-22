@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { drawBox } from './box.js';
+import { drawName } from './name.js';
 
 export function createPreview(viewport, overlay, onStatus) {
   const renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -88,7 +89,8 @@ export function createPreview(viewport, overlay, onStatus) {
         }
       }
     }
-    drawBox(context, bounds, settings);
+    drawBox(context, bounds, settings.box);
+    drawName(context, bounds, settings.name, settings.box.padding, { width, height });
   }
 
   function invalidate() {

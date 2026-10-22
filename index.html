@@ -1,150 +1,137 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
-<meta name="color-scheme" content="dark">
-<title>ESP Visuals</title>
-<style>
-:root{color-scheme:dark;--bg:#070708;--panel:#101012;--line:#252527;--text:#ddd;--muted:#777;--accent:#bc9ab5}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:12px Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}main{max-width:880px;margin:52px auto 80px;width:calc(100% - 40px)}
-header{height:44px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #303034}header b{font-size:13px}header span{color:var(--muted)}
-nav{display:flex;gap:28px;overflow:auto;border-bottom:1px solid var(--line)}nav button{padding:14px 0 12px;background:none;border:0;color:var(--muted);position:relative}nav button.active{color:#eee}nav button.active:after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--accent)}nav button:disabled{opacity:.3}
-.frame{margin-top:18px;border:1px solid var(--line);background:var(--panel)}.framebar{height:39px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px}.tools{display:flex;align-items:center;gap:8px}.tools span{color:var(--muted);margin-right:7px}.tools button{background:none;border:1px solid transparent;color:var(--muted);padding:4px 8px}.tools button.active{border-color:#38383c;background:#1b1b1d;color:#eee}
-#viewport{height:392px;position:relative;touch-action:pan-y;overflow:hidden;contain:layout paint}#viewport.orbit{touch-action:none}#scene{overflow:hidden}#scene canvas{max-width:100%;max-height:100%}#scene,#overlay{position:absolute;inset:0;width:100%;height:100%}#scene canvas{display:block;width:100%;height:100%}#overlay{pointer-events:none}.scene-label{position:absolute;bottom:12px;left:14px;color:#666;font-size:10px;pointer-events:none}
-.heading{height:48px;border-bottom:1px solid var(--line);display:flex;align-items:end;justify-content:space-between;padding-bottom:10px}.heading b{font-size:12px}.heading label{color:#aaa}
-.settings{display:grid;grid-template-columns:1fr 1fr;gap:22px;padding-top:8px}.section{color:var(--muted);font-size:10px;margin:9px 0 4px}.row{display:flex;align-items:center;justify-content:space-between;min-height:31px;gap:12px}.row>span,.range label{color:#b5b5b8;font-size:11px}.choice{display:flex;gap:2px}.choice button{background:#121214;border:1px solid #303034;color:#999;padding:5px 12px}.choice button.active{background:#272327;border-color:#52404f;color:#fff}
-input[type=checkbox]{appearance:none;width:13px;height:13px;border:1px solid #555;background:#111;vertical-align:middle;margin:0;cursor:pointer}input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}input[type=checkbox]:checked:after{content:"✓";color:#171017;position:relative;top:-3px;left:2px;font-size:12px}
-.range{margin:6px 0 10px}.range>div{display:flex;justify-content:space-between}.range output{color:#888;font-size:11px}.range input{appearance:none;width:100%;height:2px;background:#353538;margin:15px 0 5px}.range input::-webkit-slider-thumb{appearance:none;width:9px;height:9px;background:var(--accent);border-radius:1px}
-.color{display:flex;align-items:center;gap:8px}.color small{color:#777}.color input{width:30px;height:20px;border:1px solid #555;background:none;padding:0}.color input::-webkit-color-swatch-wrapper{padding:0}.color input::-webkit-color-swatch{border:0}
-footer{border-top:1px solid var(--line);margin-top:10px;display:flex;justify-content:flex-end;padding-top:8px}footer button{background:none;border:0;color:#777;padding:6px 0}.hidden{display:none}
-@media(max-width:640px){main{width:calc(100% - 24px);margin:16px auto 40px}nav{gap:22px}.frame{margin-top:12px}#viewport{height:330px}.settings{grid-template-columns:1fr;gap:0}.tools span{display:none}}
-</style>
-</head>
-<body>
-<main>
-<header><b>esp.visuals</b><span>visual editor</span></header>
-<nav id="groups"><button class="active" data-group="Enemy">Enemy</button><button data-group="Friendly">Friendly</button><button data-group="Self">Self</button><button data-group="World">World</button><button disabled>Extra</button></nav>
-<div class="frame"><div class="framebar"><span>Preview</span><div class="tools"><span>R6</span><button class="active" data-view="2d">2D</button><button data-view="3d">3D</button><button id="resetView">Reset</button></div></div><div id="viewport"><div id="scene"></div><canvas id="overlay"></canvas><span class="scene-label" id="sceneLabel">2D / FRONT</span></div></div>
-<div class="heading"><b>Box</b><label><input id="enabled" type="checkbox" checked> Enabled</label></div>
-<div class="settings">
-<div><div class="section">Geometry</div><div class="row"><span>Style</span><div class="choice"><button data-style="full">Full</button><button class="active" data-style="corner">Corner</button></div></div>
-<div class="range"><div><label for="thickness">Thickness</label><output id="thicknessOut"></output></div><input id="thickness" type="range" min=".5" max="5" step=".5"></div>
-<div class="range"><div><label for="padding">Padding</label><output id="paddingOut"></output></div><input id="padding" type="range" min="0" max="20"></div>
-<div class="range" id="cornerRow"><div><label for="cornerLength">Corner length</label><output id="cornerLengthOut"></output></div><input id="cornerLength" type="range" min="10" max="50"></div></div>
-<div><div class="section">Appearance</div><div class="row"><span>Color</span><div class="color"><small id="colorHex"></small><input id="color" type="color"></div></div>
-<div class="range"><div><label for="opacity">Opacity</label><output id="opacityOut"></output></div><input id="opacity" type="range" min="0" max="100" step="5"></div>
-<div class="row"><span>Outline</span><input id="outline" type="checkbox"></div><div class="row" id="outlineRow"><span>Outline color</span><div class="color"><small id="outlineColorHex"></small><input id="outlineColor" type="color"></div></div>
-<div class="row"><span>Fill</span><input id="fill" type="checkbox"></div><div id="fillOptions"><div class="row"><span>Fill color</span><div class="color"><small id="fillColorHex"></small><input id="fillColor" type="color"></div></div><div class="range"><div><label for="fillOpacity">Fill opacity</label><output id="fillOpacityOut"></output></div><input id="fillOpacity" type="range" min="0" max="100" step="5"></div></div></div>
-</div>
-<footer><button id="resetSettings">Reset settings</button></footer>
-</main>
-<script type="importmap">{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}</script>
-<script type="module">
-import * as THREE from 'three';
-import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
-const $=id=>document.getElementById(id),viewport=$('viewport'),overlay=$('overlay'),ctx=overlay.getContext('2d');
-const defaults={enabled:true,style:'corner',thickness:1.5,padding:3,cornerLength:25,color:'#c6c6c8',opacity:100,outline:true,outlineColor:'#050505',fill:false,fillColor:'#c6c6c8',fillOpacity:15};
-const states={Enemy:{...defaults},Friendly:{...defaults,color:'#87c4c6'},Self:{...defaults,color:'#d1bd9d'},World:{...defaults,color:'#d1ad73'}};
-const fields=['enabled','thickness','padding','cornerLength','color','opacity','outline','outlineColor','fill','fillColor','fillOpacity'];
-let group='Enemy',view='2d',yaw=.48,drag=null;
-const scene=new THREE.Scene();scene.background=new THREE.Color('#17181a');
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:false});renderer.setPixelRatio(Math.min(devicePixelRatio||1,2));renderer.outputColorSpace=THREE.SRGBColorSpace;
-$('scene').appendChild(renderer.domElement);
-const ortho=new THREE.OrthographicCamera(-4.8,4.8,3.5,-3.5,.1,100);
-const perspective=new THREE.PerspectiveCamera(38,1,.1,100);
-const avatar=new THREE.Group();scene.add(avatar);
-const ambient=new THREE.HemisphereLight(0xffffff,0x6d6d76,2.1);scene.add(ambient);
-const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(-3,8,7);scene.add(key);
-const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshStandardMaterial({color:'#1a1b1d',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;scene.add(floor);
-const grid=new THREE.GridHelper(40,40,0x292a2c,0x292a2c);grid.position.y=-.015;scene.add(grid);
-const modelHolder=new THREE.Group();avatar.add(modelHolder);
-modelHolder.rotation.z=THREE.MathUtils.degToRad(1.5);
-new GLTFLoader().load('./roblox_rigged_r6_noob.glb',gltf=>{
- const model=gltf.scene;
- model.updateMatrixWorld(true);
- let bounds=new THREE.Box3().setFromObject(model);
- const rawSize=new THREE.Vector3();bounds.getSize(rawSize);
- // FBX exports commonly use Z-up; select the vertical axis from the source dimensions.
- if(rawSize.z>rawSize.y*1.2)model.rotation.x=-Math.PI/2;
- model.updateMatrixWorld(true);
- bounds.setFromObject(model);
- const dimensions=new THREE.Vector3();bounds.getSize(dimensions);
- if(!Number.isFinite(dimensions.y)||dimensions.y<1e-6)throw new Error('Invalid R6 model bounds');
- const factor=Math.min(4.65/dimensions.y,3.45/Math.max(dimensions.x,dimensions.z));
- model.scale.multiplyScalar(factor);
- model.updateMatrixWorld(true);
- bounds.setFromObject(model);
- model.position.set(-(bounds.min.x+bounds.max.x)/2,-bounds.min.y,-(bounds.min.z+bounds.max.z)/2);
- modelHolder.add(model);
- // Counter the slight roll baked into the exported rig, preserving camera alignment.
- modelHolder.rotation.z=-0.018;
- modelHolder.updateMatrixWorld(true);
- draw();
-},undefined,error=>{console.error('R6 model failed to load',error);$('sceneLabel').textContent='MODEL LOAD FAILED'});
-const world=new THREE.Group();scene.add(world);
-const crate=new THREE.Mesh(new THREE.BoxGeometry(2,2,1.5),new THREE.MeshStandardMaterial({color:0x66615a,roughness:1}));crate.position.y=1;world.add(crate);
-const tmp=new THREE.Vector3(),corners=[],size=new THREE.Vector3(),center=new THREE.Vector3();
-function sync(){
- const s=states[group];
- for(const id of fields){const el=$(id);el[el.type==='checkbox'?'checked':'value']=s[id]}
- for(const id of ['thickness','padding','cornerLength','opacity','fillOpacity'])$(id+'Out').textContent=s[id]+(['thickness','padding'].includes(id)?' px':'%');
- for(const id of ['color','outlineColor','fillColor'])$(id+'Hex').textContent=s[id];
- document.querySelectorAll('[data-style]').forEach(el=>el.classList.toggle('active',el.dataset.style===s.style));
- document.querySelectorAll('[data-group]').forEach(el=>el.classList.toggle('active',el.dataset.group===group));
- $('cornerRow').classList.toggle('hidden',s.style!=='corner');
- $('outlineRow').classList.toggle('hidden',!s.outline);
- $('fillOptions').classList.toggle('hidden',!s.fill);
- avatar.visible=group!=='World';world.visible=group==='World';
- draw();
-}
-function resize(){
- const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h)return;
- renderer.setSize(w,h,false);
- const d=Math.min(devicePixelRatio||1,2);overlay.width=Math.round(w*d);overlay.height=Math.round(h*d);ctx.setTransform(d,0,0,d,0,0);
- ortho.left=-3.65*w/h;ortho.right=3.65*w/h;ortho.top=3.65;ortho.bottom=-3.65;ortho.updateProjectionMatrix();
- perspective.aspect=w/h;perspective.updateProjectionMatrix();draw();
-}
-function draw(){
- const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h)return;
- const camera=view==='2d'?ortho:perspective;
- avatar.rotation.y=view==='3d'?yaw:0;world.rotation.y=avatar.rotation.y;
- if(view==='2d'){camera.position.set(0,2.6,15);camera.lookAt(0,2.6,0)}
- else{camera.position.set(0,2.55,12.8);camera.lookAt(0,2.55,0)}
- camera.updateMatrixWorld();avatar.updateMatrixWorld(true);world.updateMatrixWorld(true);
- renderer.render(scene,camera);ctx.clearRect(0,0,w,h);
- const s=states[group];if(!s.enabled)return;
- const target=group==='World'?world:avatar;
- const bounds=new THREE.Box3().setFromObject(target);
- bounds.getSize(size);bounds.getCenter(center);
- const min=bounds.min,max=bounds.max;
- corners.length=0;
- for(const x of [min.x,max.x])for(const y of [min.y,max.y])for(const z of [min.z,max.z]){
-  tmp.set(x,y,z).project(camera);corners.push([(tmp.x+1)*w/2,(1-tmp.y)*h/2]);
- }
- const left=Math.min(...corners.map(p=>p[0]))-s.padding,right=Math.max(...corners.map(p=>p[0]))+s.padding;
- const top=Math.min(...corners.map(p=>p[1]))-s.padding,bottom=Math.max(...corners.map(p=>p[1]))+s.padding;
- const bw=right-left,bh=bottom-top;
- ctx.save();
- if(s.fill){ctx.globalAlpha=s.fillOpacity/100;ctx.fillStyle=s.fillColor;ctx.fillRect(left,top,bw,bh)}
- function path(){ctx.beginPath();if(s.style==='full'){ctx.rect(left,top,bw,bh);return}
- const cx=bw*s.cornerLength/100,cy=bh*s.cornerLength/100;
- for(const [x,y,dx,dy] of [[left,top,1,1],[right,top,-1,1],[left,bottom,1,-1],[right,bottom,-1,-1]]){
- ctx.moveTo(x,y+dy*cy);ctx.lineTo(x,y);ctx.lineTo(x+dx*cx,y)}}
- ctx.globalAlpha=s.opacity/100;
- if(s.outline){path();ctx.strokeStyle=s.outlineColor;ctx.lineWidth=s.thickness+2;ctx.stroke()}
- path();ctx.strokeStyle=s.color;ctx.lineWidth=s.thickness;ctx.stroke();ctx.restore();
-}
-for(const id of fields)$(id).addEventListener('input',()=>{const el=$(id);states[group][id]=el.type==='checkbox'?el.checked:el.type==='range'?Number(el.value):el.value;sync()});
-document.querySelectorAll('[data-style]').forEach(el=>el.onclick=()=>{states[group].style=el.dataset.style;sync()});
-document.querySelectorAll('[data-group]').forEach(el=>el.onclick=()=>{group=el.dataset.group;sync()});
-document.querySelectorAll('[data-view]').forEach(el=>el.onclick=()=>{view=el.dataset.view;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));viewport.classList.toggle('orbit',view==='3d');$('sceneLabel').textContent=view==='2d'?'2D / FRONT':'3D / DRAG TO ROTATE';draw()});
-$('resetView').onclick=()=>{yaw=.48;draw()};
-$('resetSettings').onclick=()=>{states[group]={...defaults};sync()};
-viewport.addEventListener('pointerdown',e=>{if(view==='3d'){e.preventDefault();drag=e.clientX;viewport.setPointerCapture(e.pointerId)}});
-viewport.addEventListener('pointermove',e=>{if(drag!==null){yaw+=(e.clientX-drag)/180;drag=e.clientX;draw()}});
-for(const event of ['pointerup','pointercancel'])viewport.addEventListener(event,()=>drag=null);
-new ResizeObserver(resize).observe(viewport);sync();resize();
-</script>
-</body>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="color-scheme" content="dark" />
+    <title>ESP Visuals</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main>
+      <header>
+        <b>esp.visuals</b>
+        <span>visual editor</span>
+      </header>
+      <nav id="groups">
+        <button class="active" data-group="Enemy">Enemy</button>
+        <button data-group="Friendly">Friendly</button>
+        <button data-group="Self">Self</button>
+        <button data-group="World">World</button>
+        <button disabled>Extra</button>
+      </nav>
+      <div class="frame">
+        <div class="framebar">
+          <span>Preview</span>
+          <div class="tools">
+            <span id="subjectLabel">R6</span>
+            <button class="active" data-view="2d">2D</button>
+            <button data-view="3d">3D</button>
+            <button id="resetView">Reset</button>
+          </div>
+        </div>
+        <div id="viewport">
+          <canvas id="overlay"> </canvas>
+          <span class="scene-label" id="sceneLabel" role="status">Loading model…</span>
+        </div>
+      </div>
+      <div class="heading">
+        <b>Box</b>
+        <label> <input id="enabled" type="checkbox" checked /> Enabled</label>
+      </div>
+      <div class="settings">
+        <div>
+          <div class="section">Geometry</div>
+          <div class="row">
+            <span>Style</span>
+            <div class="choice">
+              <button data-style="full">Full</button>
+              <button class="active" data-style="corner">Corner</button>
+            </div>
+          </div>
+          <div class="range">
+            <div>
+              <label for="thickness">Thickness</label>
+              <output id="thicknessOut"> </output>
+            </div>
+            <input id="thickness" type="range" min=".5" max="5" step=".5" />
+          </div>
+          <div class="range">
+            <div>
+              <label for="padding">Padding</label>
+              <output id="paddingOut"> </output>
+            </div>
+            <input id="padding" type="range" min="0" max="20" />
+          </div>
+          <div class="range" id="cornerRow">
+            <div>
+              <label for="cornerLength">Corner length</label>
+              <output id="cornerLengthOut"> </output>
+            </div>
+            <input id="cornerLength" type="range" min="10" max="50" />
+          </div>
+        </div>
+        <div>
+          <div class="section">Appearance</div>
+          <div class="row">
+            <span>Color</span>
+            <div class="color">
+              <small id="colorHex"> </small>
+              <input id="color" type="color" aria-label="color" />
+            </div>
+          </div>
+          <div class="range">
+            <div>
+              <label for="opacity">Opacity</label>
+              <output id="opacityOut"> </output>
+            </div>
+            <input id="opacity" type="range" min="0" max="100" step="5" />
+          </div>
+          <div class="row">
+            <span>Outline</span>
+            <input id="outline" type="checkbox" aria-label="Outline" />
+          </div>
+          <div class="row" id="outlineRow">
+            <span>Outline color</span>
+            <div class="color">
+              <small id="outlineColorHex"> </small>
+              <input id="outlineColor" type="color" aria-label="outlineColor" />
+            </div>
+          </div>
+          <div class="row">
+            <span>Fill</span>
+            <input id="fill" type="checkbox" aria-label="Fill" />
+          </div>
+          <div id="fillOptions">
+            <div class="row">
+              <span>Fill color</span>
+              <div class="color">
+                <small id="fillColorHex"> </small>
+                <input id="fillColor" type="color" aria-label="fillColor" />
+              </div>
+            </div>
+            <div class="range">
+              <div>
+                <label for="fillOpacity">Fill opacity</label>
+                <output id="fillOpacityOut"> </output>
+              </div>
+              <input id="fillOpacity" type="range" min="0" max="100" step="5" />
+            </div>
+          </div>
+        </div>
+      </div>
+      <footer>
+        <button id="resetSettings">Reset settings</button>
+      </footer>
+    </main>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+        }
+      }
+    </script>
+    <script type="module" src="./src/app.js"></script>
+  </body>
 </html>

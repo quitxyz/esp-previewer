@@ -106,8 +106,8 @@ function draw(){
  const w=viewport.clientWidth,h=viewport.clientHeight;if(!w||!h)return;
  const camera=view==='2d'?ortho:perspective;
  avatar.rotation.y=view==='3d'?yaw:0;world.rotation.y=avatar.rotation.y;
- if(view==='2d'){camera.position.set(0,3,15);camera.lookAt(0,2.6,0)}
- else{camera.position.set(0,3.2,12.8);camera.lookAt(0,2.55,0)}
+ if(view==='2d'){camera.position.set(0,2.6,15);camera.lookAt(0,2.6,0)}
+ else{camera.position.set(0,2.55,12.8);camera.lookAt(0,2.55,0)}
  camera.updateMatrixWorld();avatar.updateMatrixWorld(true);world.updateMatrixWorld(true);
  renderer.render(scene,camera);ctx.clearRect(0,0,w,h);
  const s=states[group];if(!s.enabled)return;

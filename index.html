@@ -76,6 +76,8 @@ new GLTFLoader().load('./roblox_rigged_r6_noob.glb',gltf=>{
  bounds.setFromObject(model);
  model.position.set(-(bounds.min.x+bounds.max.x)/2,-bounds.min.y,-(bounds.min.z+bounds.max.z)/2);
  modelHolder.add(model);
+ // Counter the slight roll baked into the exported rig, preserving camera alignment.
+ modelHolder.rotation.z=-0.018;
  modelHolder.updateMatrixWorld(true);
  draw();
 },undefined,error=>{console.error('R6 model failed to load',error);$('sceneLabel').textContent='MODEL LOAD FAILED'});

@@ -59,6 +59,7 @@ const key=new THREE.DirectionalLight(0xffffff,2.2);key.position.set(-3,8,7);scen
 const floor=new THREE.Mesh(new THREE.PlaneGeometry(100,100),new THREE.MeshStandardMaterial({color:'#1a1b1d',roughness:1}));floor.rotation.x=-Math.PI/2;floor.position.y=-.025;scene.add(floor);
 const grid=new THREE.GridHelper(40,40,0x292a2c,0x292a2c);grid.position.y=-.015;scene.add(grid);
 const modelHolder=new THREE.Group();avatar.add(modelHolder);
+modelHolder.rotation.z=THREE.MathUtils.degToRad(1.5);
 new GLTFLoader().load('./roblox_rigged_r6_noob.glb',gltf=>{
  const model=gltf.scene;
  model.updateMatrixWorld(true);

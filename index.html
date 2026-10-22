@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="dark">
+<title>ESP Visuals</title>
+<style>
+:root{color-scheme:dark;--bg:#070708;--panel:#101012;--line:#252527;--text:#ddd;--muted:#777;--accent:#bc9ab5}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:12px Arial,sans-serif}button,input{font:inherit}button{cursor:pointer}main{max-width:880px;margin:52px auto 80px;width:calc(100% - 40px)}
+header{height:44px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #303034}header b{font-size:13px}header span{color:var(--muted)}
+nav{display:flex;gap:28px;overflow:auto;border-bottom:1px solid var(--line)}nav button{padding:14px 0 12px;background:none;border:0;color:var(--muted);position:relative}nav button.active{color:#eee}nav button.active:after{content:"";position:absolute;bottom:0;left:0;right:0;height:1px;background:var(--accent)}nav button:disabled{opacity:.3}
+.frame{margin-top:18px;border:1px solid var(--line);background:var(--panel)}.framebar{height:39px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 12px}.tools{display:flex;align-items:center;gap:8px}.tools span{color:var(--muted);margin-right:7px}.tools button{background:none;border:1px solid transparent;color:var(--muted);padding:4px 8px}.tools button.active{border-color:#38383c;background:#1b1b1d;color:#eee}
+#viewport{height:392px;position:relative;touch-action:pan-y}#viewport.orbit{touch-action:none}canvas{display:block;width:100%;height:100%}.scene-label{position:absolute;bottom:12px;left:14px;color:#666;font-size:10px;pointer-events:none}
+.heading{height:48px;border-bottom:1px solid var(--line);display:flex;align-items:end;justify-content:space-between;padding-bottom:10px}.heading b{font-size:12px}.heading label{color:#aaa}
+.settings{display:grid;grid-template-columns:1fr 1fr;gap:32px;padding-top:10px}.section{color:var(--muted);font-size:10px;margin:12px 0 6px}.row{display:flex;align-items:center;justify-content:space-between;min-height:35px;gap:12px}.row>span,.range label{color:#b5b5b8;font-size:11px}.choice{display:flex;gap:2px}.choice button{background:#121214;border:1px solid #303034;color:#999;padding:5px 12px}.choice button.active{background:#272327;border-color:#52404f;color:#fff}
+input[type=checkbox]{appearance:none;width:13px;height:13px;border:1px solid #555;background:#111;vertical-align:middle;margin:0;cursor:pointer}input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}input[type=checkbox]:checked:after{content:"✓";color:#171017;position:relative;top:-3px;left:2px;font-size:12px}
+.range{margin:8px 0 14px}.range>div{display:flex;justify-content:space-between}.range output{color:#888;font-size:11px}.range input{appearance:none;width:100%;height:2px;background:#353538;margin:15px 0 5px}.range input::-webkit-slider-thumb{appearance:none;width:9px;height:9px;background:var(--accent);border-radius:1px}
+.color{display:flex;align-items:center;gap:8px}.color small{color:#777}.color input{width:30px;height:20px;border:1px solid #555;background:none;padding:0}.color input::-webkit-color-swatch-wrapper{padding:0}.color input::-webkit-color-swatch{border:0}
+footer{border-top:1px solid var(--line);margin-top:10px;display:flex;justify-content:flex-end;padding-top:8px}footer button{background:none;border:0;color:#777;padding:6px 0}.hidden{display:none}
+@media(max-width:640px){main{width:calc(100% - 24px);margin:16px auto 40px}nav{gap:22px}.frame{margin-top:12px}#viewport{height:310px}.settings{grid-template-columns:1fr;gap:0}.tools span{display:none}}
+</style>
+</head>
+<body>
+<main>
+<header><b>esp.visuals</b><span>visual editor</span></header>
+<nav id="groups"><button class="active" data-group="Enemy">Enemy</button><button data-group="Friendly">Friendly</button><button data-group="Self">Self</button><button data-group="World">World</button><button disabled>Extra</button></nav>
+<div class="frame"><div class="framebar"><span>Preview</span><div class="tools"><span>R6</span><button class="active" data-view="2d">2D</button><button data-view="3d">3D</button><button id="resetView">Reset</button></div></div><div id="viewport"><canvas id="scene"></canvas><span class="scene-label" id="sceneLabel">2D / FRONT</span></div></div>
+<div class="heading"><b>Box</b><label><input id="enabled" type="checkbox" checked> Enabled</label></div>
+<div class="settings">
+<div><div class="section">Geometry</div><div class="row"><span>Style</span><div class="choice"><button data-style="full">Full</button><button class="active" data-style="corner">Corner</button></div></div>
+<div class="range"><div><label for="thickness">Thickness</label><output id="thicknessOut"></output></div><input id="thickness" type="range" min=".5" max="5" step=".5"></div>
+<div class="range"><div><label for="padding">Padding</label><output id="paddingOut"></output></div><input id="padding" type="range" min="0" max="20"></div>
+<div class="range" id="cornerRow"><div><label for="cornerLength">Corner length</label><output id="cornerLengthOut"></output></div><input id="cornerLength" type="range" min="10" max="50"></div></div>
+<div><div class="section">Appearance</div><div class="row"><span>Color</span><div class="color"><small id="colorHex"></small><input id="color" type="color"></div></div>
+<div class="range"><div><label for="opacity">Opacity</label><output id="opacityOut"></output></div><input id="opacity" type="range" min="0" max="100" step="5"></div>
+<div class="row"><span>Outline</span><input id="outline" type="checkbox"></div><div class="row" id="outlineRow"><span>Outline color</span><div class="color"><small id="outlineColorHex"></small><input id="outlineColor" type="color"></div></div>
+<div class="row"><span>Fill</span><input id="fill" type="checkbox"></div><div id="fillOptions"><div class="row"><span>Fill color</span><div class="color"><small id="fillColorHex"></small><input id="fillColor" type="color"></div></div><div class="range"><div><label for="fillOpacity">Fill opacity</label><output id="fillOpacityOut"></output></div><input id="fillOpacity" type="range" min="0" max="100" step="5"></div></div></div>
+</div>
+<footer><button id="resetSettings">Reset settings</button></footer>
+</main>
+<script>
+(()=>{
+const $=id=>document.getElementById(id),canvas=$('scene'),ctx=canvas.getContext('2d'),viewport=$('viewport');
+const defaults={enabled:true,style:'corner',thickness:1.5,padding:3,cornerLength:25,color:'#c6c6c8',opacity:100,outline:true,outlineColor:'#050505',fill:false,fillColor:'#c6c6c8',fillOpacity:15};
+const states={Enemy:{...defaults},Friendly:{...defaults,color:'#87c4c6'},Self:{...defaults,color:'#d1bd9d'},World:{...defaults,color:'#d1ad73'}};
+let group='Enemy',view='2d',angle=.45,drag=null;
+const fields=['enabled','thickness','padding','cornerLength','color','opacity','outline','outlineColor','fill','fillColor','fillOpacity'];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+function sync(){
+ const s=states[group];
+ fields.forEach(id=>{const el=$(id);el[el.type==='checkbox'?'checked':'value']=s[id]});
+ ['thickness','padding','cornerLength','opacity','fillOpacity'].forEach(id=>$(id+'Out').textContent=s[id]+(id==='thickness'||id==='padding'?' px':'%'));
+ ['color','outlineColor','fillColor'].forEach(id=>$(id+'Hex').textContent=s[id]);
+ document.querySelectorAll('[data-style]').forEach(el=>el.classList.toggle('active',el.dataset.style===s.style));
+ $('cornerRow').classList.toggle('hidden',s.style!=='corner');
+ $('outlineRow').classList.toggle('hidden',!s.outline);
+ $('fillOptions').classList.toggle('hidden',!s.fill);
+ document.querySelectorAll('[data-group]').forEach(el=>el.classList.toggle('active',el.dataset.group===group));
+ draw();
+}
+function resize(){const r=canvas.getBoundingClientRect(),d=Math.min(devicePixelRatio||1,2);canvas.width=Math.round(r.width*d);canvas.height=Math.round(r.height*d);ctx.setTransform(d,0,0,d,0,0);draw()}
+function draw(){
+ const w=canvas.clientWidth,h=canvas.clientHeight;if(!w||!h)return;
+ ctx.clearRect(0,0,w,h);ctx.fillStyle='#121315';ctx.fillRect(0,0,w,h);
+ ctx.fillStyle='#17181a';ctx.fillRect(0,0,w,h*.73);
+ ctx.fillStyle='#191a1b';ctx.fillRect(0,h*.73,w,h*.27);
+ ctx.strokeStyle='#242527';ctx.lineWidth=1;
+ ctx.beginPath();ctx.moveTo(0,h*.73);ctx.lineTo(w,h*.73);ctx.stroke();
+ for(let i=0;i<8;i++){let y=h*.73+(h*.27)*Math.pow(i/8,1.4);ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke()}
+ for(let i=-5;i<=5;i++){ctx.beginPath();ctx.moveTo(w/2+i*12,h*.73);ctx.lineTo(w/2+i*85,h);ctx.stroke()}
+ const s=states[group],scale=Math.min(w/11,h/8.7),ox=w/2,oy=h*.83;
+ function project(x,y,z){let a=view==='3d'?angle:0;let rx=x*Math.cos(a)+z*Math.sin(a),rz=z*Math.cos(a)-x*Math.sin(a);let perspective=view==='3d'?1/(1+rz*.09):1;return [ox+rx*scale*perspective,oy-y*scale*perspective]}
+ const boxes=group==='World'?[[-1,0,-.65,2,2,1.3,'#56504a']]:[
+ [-1,2,-.5,2,2,1,'#404f67'],[-1,4,-.5,2,1,1,'#d5b894'],[-2,2,-.5,1,2,1,'#d5b894'],[1,2,-.5,1,2,1,'#d5b894'],[-1,0,-.5,1,2,1,'#30343c'],[0,0,-.5,1,2,1,'#30343c']];
+ const points=[];
+ boxes.forEach(([x,y,z,bw,bh,bd,color],index)=>{
+ const verts=[[x,y,z],[x+bw,y,z],[x+bw,y+bh,z],[x,y+bh,z],[x,y,z+bd],[x+bw,y,z+bd],[x+bw,y+bh,z+bd],[x,y+bh,z+bd]].map(p=>project(...p));
+ points.push(...verts);
+ const faces=[[0,1,2,3],[1,5,6,2],[4,5,6,7]];
+ faces.forEach((f,j)=>{ctx.fillStyle=j===0?color:j===1?'#242830':'#6b6a6c';ctx.beginPath();f.forEach((n,k)=>{const p=verts[n];k?ctx.lineTo(...p):ctx.moveTo(...p)});ctx.closePath();ctx.fill();ctx.strokeStyle='#252628';ctx.lineWidth=.7;ctx.stroke()});
+ if(index===1&&group!=='World'){let p=project(0,4.48,-.51);ctx.fillStyle='#292321';ctx.fillRect(p[0]-scale*.22,p[1],scale*.09,scale*.09);ctx.fillRect(p[0]+scale*.15,p[1],scale*.09,scale*.09)}
+ });
+ if(!s.enabled)return;
+ let x=Math.min(...points.map(p=>p[0]))-s.padding,y=Math.min(...points.map(p=>p[1]))-s.padding,r=Math.max(...points.map(p=>p[0]))+s.padding,b=Math.max(...points.map(p=>p[1]))+s.padding;
+ let bw=r-x,bh=b-y;ctx.save();
+ if(s.fill){ctx.globalAlpha=s.fillOpacity/100;ctx.fillStyle=s.fillColor;ctx.fillRect(x,y,bw,bh);ctx.globalAlpha=1}
+ function path(){ctx.beginPath();if(s.style==='full'){ctx.rect(x,y,bw,bh)}else{let cx=bw*s.cornerLength/100,cy=bh*s.cornerLength/100;[[x,y,1,1],[r,y,-1,1],[x,b,1,-1],[r,b,-1,-1]].forEach(([px,py,dx,dy])=>{ctx.moveTo(px,py+dy*cy);ctx.lineTo(px,py);ctx.lineTo(px+dx*cx,py)})}}
+ if(s.outline){path();ctx.strokeStyle=s.outlineColor;ctx.lineWidth=s.thickness+2;ctx.globalAlpha=s.opacity/100;ctx.stroke()}
+ path();ctx.strokeStyle=s.color;ctx.lineWidth=s.thickness;ctx.globalAlpha=s.opacity/100;ctx.stroke();ctx.restore();
+}
+fields.forEach(id=>$(id).addEventListener('input',()=>{let el=$(id);states[group][id]=el.type==='checkbox'?el.checked:el.type==='range'?Number(el.value):el.value;sync()}));
+document.querySelectorAll('[data-style]').forEach(el=>el.addEventListener('click',()=>{states[group].style=el.dataset.style;sync()}));
+document.querySelectorAll('[data-group]').forEach(el=>el.addEventListener('click',()=>{group=el.dataset.group;sync()}));
+document.querySelectorAll('[data-view]').forEach(el=>el.addEventListener('click',()=>{view=el.dataset.view;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));viewport.classList.toggle('orbit',view==='3d');$('sceneLabel').textContent=view==='2d'?'2D / FRONT':'3D / DRAG TO ROTATE';draw()}));
+$('resetView').onclick=()=>{angle=.45;draw()};
+$('resetSettings').onclick=()=>{states[group]={...defaults};sync()};
+viewport.addEventListener('pointerdown',e=>{if(view==='3d'){drag=e.clientX;viewport.setPointerCapture(e.pointerId)}});
+viewport.addEventListener('pointermove',e=>{if(drag!==null){angle+=clamp((e.clientX-drag)/150,-.3,.3);drag=e.clientX;draw()}});
+['pointerup','pointercancel'].forEach(ev=>viewport.addEventListener(ev,()=>drag=null));
+new ResizeObserver(resize).observe(viewport);sync();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+    "aliases": {
+        "src": "./src",
+        "core": "./src/core",
+        "components": "./src/components",
+        "renderers": "./src/renderers"
+    }
+}

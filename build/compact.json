@@ -1,0 +1,27 @@
+{
+    "generator": "dense",
+    "bundle": {
+        "require_mode": {
+            "name": "luau",
+            "use_luau_configuration": true
+        }
+    },
+    "rules": [
+        "compute_expression",
+        "filter_after_early_return",
+        "remove_unused_if_branch",
+        "remove_unused_while",
+        "remove_unused_variable",
+        "remove_empty_do",
+        "remove_nil_declaration",
+        "group_local_assignment",
+        "convert_index_to_field",
+        "remove_function_call_parens",
+        {
+            "rule": "rename_variables",
+            "include_functions": true,
+            "detect_globals": true,
+            "globals": ["$default", "$roblox"]
+        }
+    ]
+}

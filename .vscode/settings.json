@@ -1,0 +1,10 @@
+{
+    "luau-lsp.sourcemap.enabled": false,
+    "luau-lsp.types.definitionFiles": {
+        "environment": "./.globals/environment.d.luau",
+        "junkie": "./.globals/junkie.d.luau",
+        "luarmor": "./.globals/luarmor.d.luau",
+        "pandauth": "./.globals/pandauth.d.luau",
+        "luraph": "./.globals/luraph.d.luau"
+    }
+}

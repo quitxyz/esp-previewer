@@ -3,6 +3,7 @@
         "src": "./src",
         "core": "./src/core",
         "components": "./src/components",
-        "renderers": "./src/renderers"
+        "renderers": "./src/renderers",
+        "utils": "./src/utils"
     }
 }
